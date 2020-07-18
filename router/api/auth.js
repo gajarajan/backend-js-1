@@ -45,7 +45,7 @@ router.post(
         return res
           .status(400)
           .json({ errors: [{ msg: "passward is not match" }] });
-      }
+      } 
       const payload = {
         user: {
           id: user.id,
