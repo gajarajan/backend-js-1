@@ -145,7 +145,7 @@ router.get(
     [
       check("title", "title is required").not().isEmpty(),
       check("company", "company is required").not().isEmpty(),
-      // check("from", "from is required").not().isEmpty(),
+       check("from", "from is required").not().isEmpty(),
     ],
   ],
   async (req, res) => {
@@ -174,4 +174,22 @@ router.get(
     }
   }
 );
+//@route  Delete api/profile/experience/:exp_id
+//@dec  Delete experience from profile
+//@access private
+router.delete("/experience/:exp_id", auth, async (req, res) => {
+  try {
+    //@todo-remove user posts
+    //Remove profile
+    const profile = await Profile.findOne({ user: req.user.id });
+    //remove user
+    const removeIndex=profile.experience.map(item =>item.id).indexOf(req.params.exp_id)
+    profile.experience.splice(removeIndex);
+    await profile.save();
+    res.json(profile)
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("server Error");
+  }
+});
 module.exports = router;
