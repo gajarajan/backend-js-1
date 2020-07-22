@@ -145,7 +145,7 @@ router.get(
     [
       check("title", "title is required").not().isEmpty(),
       check("company", "company is required").not().isEmpty(),
-       check("from", "from is required").not().isEmpty(),
+      check("from", "from is required").not().isEmpty(),
     ],
   ],
   async (req, res) => {
@@ -183,10 +183,60 @@ router.delete("/experience/:exp_id", auth, async (req, res) => {
     //Remove profile
     const profile = await Profile.findOne({ user: req.user.id });
     //remove user
-    const removeIndex=profile.experience.map(item =>item.id).indexOf(req.params.exp_id)
+    const removeIndex = profile.experience
+      .map((item) => item.id)
+      .indexOf(req.params.exp_id);
     profile.experience.splice(removeIndex);
     await profile.save();
-    res.json(profile)
+    res.json(profile);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("server Error");
+  }
+});
+router.get(
+  "/education",
+  [
+    auth,
+    [
+      check("school", "school is required").not().isEmpty(),
+      check("degree", "degree is required").not().isEmpty(),
+      check("from", "from is required").not().isEmpty(),
+    ],
+  ],
+  async (req, res) => {
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+      return res.status(400).json({ error: error.array() });
+    }
+    const { school, degree, fieldofstudy, from, to, description } = req.body;
+    const NewEdu = { school, degree, fieldofstudy, from, to, description };
+    try {
+      const profile = await Profile.findOne({ user: req.user.id });
+      profile.education.unshift(NewEdu);
+      await profile.save();
+      res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("server Error");
+    }
+  }
+);
+//@route  Delete api/profile/education/:edu_id
+//@dec  Delete education from profile
+//@access private
+router.delete("/education/:edu_id", auth, async (req, res) => {
+  try {
+    //@todo-remove user posts
+    //Remove profile
+    const profile = await Profile.findOne({ user: req.user.id });
+    //remove user
+    const removeIndex = profile.experience
+      .map((item) => item.id)
+      .indexOf(req.params.edu_id);
+    profile.education.splice(removeIndex);
+    await profile.save();
+    res.json(profile);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("server Error");
